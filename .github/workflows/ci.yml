@@ -38,6 +38,9 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H localhost >> ~/.ssh/known_hosts
 
+    - name: Start SSH agent
+      run: eval $(ssh-agent -s) && ssh-add ~/.ssh/id_rsa
+
     - name: Deploy to Production Server
       run: |
         ssh -i ~/.ssh/id_rsa mateo@localhost -o StrictHostKeyChecking=no 'docker pull ${{ secrets.DOCKER_USERNAME }}/hospital-app:latest && docker run -d --name hospital-app -p 8080:8080 hospital-app:latest'
