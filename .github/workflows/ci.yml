@@ -36,7 +36,15 @@ jobs:
     - name: Push Docker image
       run: docker push ${{ secrets.DOCKER_USERNAME }}/hospital-app:latest
 
-    # Paso 6: Desplegar en el servidor de producción
+    # Paso 6: Configurar SSH
+    - name: Setup SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H localhost >> ~/.ssh/known_hosts
+
+    # Paso 7: Desplegar en el servidor de producción
     - name: Deploy to Production Server
       run: |
-        ssh user@localhost 'docker pull ${{ secrets.DOCKER_USERNAME }}/hospital-app:latest && docker run -d --name hospital-app -p 8080:8080 hospital-app:latest'
+        ssh -i ~/.ssh/id_rsa user@localhost 'docker pull ${{ secrets.DOCKER_USERNAME }}/hospital-app:latest && docker run -d --name hospital-app -p 8080:8080 hospital-app:latest'
